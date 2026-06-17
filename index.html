@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco-Macetas | Colegio Santísimo Rosario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // Enables Dark Mode via a class toggle
+            theme: {
+                extend: {
+                    colors: {
+                        eco: {
+                            light: '#e0f2fe',
+                            green: '#15803d', // Green dominant
+                            dark: '#14532d',
+                            leaf: '#65a30d', // Yerba mate touch
+                            earth: '#92400e' // Earthy tone
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Styles for Interactive Elements */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        .dark .glass-nav {
+            background: rgba(15, 23, 42, 0.95); /* Tailwind slate-900 */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .accordion-content {
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+        .accordion-content.active {
+            max-height: 500px; /* Arbitrary large number */
+            padding-bottom: 1rem;
+        }
+        .chat-window {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: bottom left;
+            transform: scale(0);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .chat-window.open {
+            transform: scale(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .typing-dot {
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+    </style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="font-sans text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-slate-900 antialiased transition-colors duration-300">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-nav transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-leaf text-eco-green text-3xl mr-3"></i>
+                    <div>
+                        <span class="font-bold text-xl text-eco-dark dark:text-white block leading-none">Eco-Macetas</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">C. Santísimo Rosario</span>
+                    </div>
+                </div>
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-6 font-medium text-sm">
+                    <a href="#inicio" class="text-gray-600 dark:text-gray-300 hover:text-eco-green dark:hover:text-eco-leaf transition">Inicio</a>
+                    <a href="#proyecto" class="text-gray-600 dark:text-gray-300 hover:text-eco-green dark:hover:text-eco-leaf transition">El Proyecto</a>
+                    <a href="#steam" class="text-gray-600 dark:text-gray-300 hover:text-eco-green dark:hover:text-eco-leaf transition">Enfoque STEAM</a>
+                    <a href="#teoria" class="text-gray-600 dark:text-gray-300 hover:text-eco-green dark:hover:text-eco-leaf transition">Teoría</a>
+                    <a href="#laboratorio" class="text-gray-600 dark:text-gray-300 hover:text-eco-green dark:hover:text-eco-leaf transition">Laboratorio</a>
+                    <a href="#dashboard-cientifico" class="bg-eco-green text-white px-5 py-2 rounded-full hover:bg-eco-dark transition shadow-md">Resultados</a>
+                    
+                    <!-- Dark Mode Toggle Button -->
+                    <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-2.5 transition">
+                        <i id="theme-toggle-dark-icon" class="fa-solid fa-moon text-lg hidden"></i>
+                        <i id="theme-toggle-light-icon" class="fa-solid fa-sun text-lg hidden"></i>
+                    </button>
+                </div>
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center space-x-4">
+                    <button id="mobile-theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 focus:outline-none rounded-lg text-xl">
+                        <i id="mobile-dark-icon" class="fa-solid fa-moon hidden"></i>
+                        <i id="mobile-light-icon" class="fa-solid fa-sun hidden"></i>
+                    </button>
+                    <button id="mobile-menu-btn" class="text-gray-600 dark:text-gray-300 hover:text-eco-green focus:outline-none text-2xl">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700 absolute w-full shadow-lg">
+            <div class="px-4 pt-2 pb-6 space-y-1 text-center flex flex-col">
+                <a href="#inicio" class="block py-3 text-gray-600 dark:text-gray-300 font-medium border-b border-gray-50 dark:border-slate-700">Inicio</a>
+                <a href="#proyecto" class="block py-3 text-gray-600 dark:text-gray-300 font-medium border-b border-gray-50 dark:border-slate-700">El Proyecto</a>
+                <a href="#steam" class="block py-3 text-gray-600 dark:text-gray-300 font-medium border-b border-gray-50 dark:border-slate-700">Enfoque STEAM</a>
+                <a href="#teoria" class="block py-3 text-gray-600 dark:text-gray-300 font-medium border-b border-gray-50 dark:border-slate-700">Teoría</a>
+                <a href="#laboratorio" class="block py-3 text-gray-600 dark:text-gray-300 font-medium border-b border-gray-50 dark:border-slate-700">Laboratorio</a>
+                <a href="https://forms.gle/vD91osQS3qPKkMFm7" target="_blank" class="block py-3 text-eco-green dark:text-eco-leaf font-bold mt-2">Ver Resultados</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="inicio" class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-eco-dark">
+        <div class="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1466692476877-3320c4e7ab9d?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
+            
+            <!-- Logo y Lema del Colegio -->
+            <img src="images/logo-colegio.png" alt="Logo Colegio Santísimo Rosario" class="w-48 md:w-60 mb-6 drop-shadow-2xl">
+            <p class="text-white/90 italic font-serif text-lg md:text-xl max-w-4xl mx-auto mb-8 tracking-wide drop-shadow-md">
+                "Educar dando sentido a la vida en el encuentro con los otros y en el cuidado integral de la creación"
+            </p>
+
+            <p class="text-eco-leaf font-semibold tracking-widest uppercase mb-4 text-sm md:text-base">Ciencia, Tecnología y Sustentabilidad</p>
+            <h1 class="text-4xl md:text-6xl font-serif font-bold text-white mb-6 leading-tight">
+                De Residuo a Recurso:<br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-eco-leaf to-green-300">Biopolímeros de Yerba Mate</span>
+            </h1>
+            <p class="mt-4 text-lg md:text-xl text-gray-300 max-w-3xl mx-auto font-light mb-10">
+                Un proyecto de química verde desarrollado por alumnos de 4° Año "B" para combatir la contaminación plástica utilizando almidón y yerba mate de descarte.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="#proyecto" class="bg-eco-leaf hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition transform hover:-translate-y-1">
+                    Conocer el Proyecto
+                </a>
+                <a href="#multimedia" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 font-semibold py-3 px-8 rounded-full backdrop-blur-sm transition">
+                    <i class="fa-solid fa-play mr-2"></i> Ver Documental
+                </a>
+            </div>
+        </div>
+        
+        <!-- Wave shape divider -->
+        <div class="absolute bottom-0 w-full overflow-hidden leading-none">
+            <svg class="relative block w-full h-12 md:h-24 dark:hidden" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.08,130.83,119.26,192.39,100.86,252.19,82.91,289.4,62.6,321.39,56.44Z" class="fill-gray-50"></path>
+            </svg>
+            <!-- Dark Mode Wave -->
+            <svg class="relative hidden dark:block w-full h-12 md:h-24" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.08,130.83,119.26,192.39,100.86,252.19,82.91,289.4,62.6,321.39,56.44Z" class="fill-slate-900"></path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Project Intro & Problem -->
+    <section id="proyecto" class="py-20 bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <!-- Text Content -->
+                <div>
+                    <h2 class="text-3xl font-serif font-bold text-eco-dark dark:text-eco-green mb-6">La Situación Problemática</h2>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                        En la comunidad de Monteros, y a nivel global, enfrentamos un desafío sin precedentes: la acumulación de plásticos de un solo uso. En la jardinería, las macetas de polietileno (PEBD) son desechadas masivamente, tardando cientos de años en degradarse.
+                    </p>
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-green-100 dark:border-slate-700 mb-6 relative overflow-hidden transition-colors duration-300">
+                        <div class="absolute top-0 left-0 w-2 h-full bg-eco-green"></div>
+                        <h3 class="font-bold text-lg text-gray-800 dark:text-white mb-2">Nuestra Pregunta de Investigación:</h3>
+                        <p class="text-gray-600 dark:text-gray-400 italic">"¿Es posible sintetizar un biopolímero biodegradable a partir de almidón de maíz y yerba mate de descarte, que permita confeccionar eco-macetas funcionales para la sustitución del plástico tradicional?"</p>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                        Nuestra hipótesis plantea que mediante la química de síntesis, utilizando glicerina como plastificante y fibra de yerba mate como refuerzo, podemos crear un contenedor orgánico que proteja a la planta y que, al ser enterrado, se degrade en menos de 90 días actuando como abono.
+                    </p>
+
+                    <!-- Hidden Objectives Section for Students -->
+                    <div class="mb-6">
+                        <button id="toggle-objetivos" class="flex items-center space-x-2 text-sm font-medium text-eco-green dark:text-eco-leaf hover:text-eco-dark dark:hover:text-green-400 focus:outline-none transition-colors duration-300">
+                            <i class="fa-solid fa-bullseye"></i>
+                            <span>Ver Objetivos del Proyecto</span>
+                            <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300" id="objetivos-icon"></i>
+                        </button>
+                        
+                        <div id="objetivos-content" class="hidden mt-4 p-5 bg-white/60 dark:bg-slate-800/60 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-gray-700 dark:text-gray-300 shadow-inner">
+                            <h4 class="font-bold text-eco-dark dark:text-white mb-2 border-b border-gray-200 dark:border-slate-600 pb-1">Objetivo General</h4>
+                            <p class="mb-4 leading-relaxed">Desarrollar un proyecto científico de carácter interdisciplinario bajo la metodología STEAM que permita la obtención de un biopolímero eco-compatible a partir de recursos renovables y residuos locales, promoviendo la conciencia ecológica y la innovación tecnológica en los alumnos de 4.° año del Colegio Santísimo Rosario.</p>
+
+                            <h4 class="font-bold text-eco-dark dark:text-white mb-2 border-b border-gray-200 dark:border-slate-600 pb-1">Objetivos Específicos</h4>
+                            <ol class="list-decimal list-inside space-y-2 marker:text-eco-green dark:marker:text-eco-leaf leading-relaxed pl-1">
+                                <li>Sintetizar a nivel de laboratorio escolar diferentes formulaciones de bioplástico variando las relaciones de almidón, agua, glicerina y carga orgánica (yerba mate).</li>
+                                <li>Evaluar cualitativa y cuantitativamente las propiedades mecánicas (flexibilidad, resistencia a la tracción) y el grado de biodegradabilidad de las muestras obtenidas.</li>
+                                <li>Diseñar y construir moldes específicos para la conformación de las "Eco-Macetas", aplicando principios estéticos y funcionales de diseño industrial.</li>
+                                <li>Implementar herramientas informáticas y plataformas digitales para el registro analítico de variables, el modelado del plan de negocios y la difusión social del proyecto mediante entornos web y códigos de respuesta rápida (QR).</li>
+                                <li>Concientizar a la comunidad de Monteros sobre la reducción del plástico y el aprovechamiento de residuos orgánicos hogareños.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- Image / Stat Box -->
+                <div class="relative">
+                    <img src="images/dashboard/eco-macetas-reales.png" alt="Eco Macetas de Yerba Mate" class="rounded-2xl shadow-2xl z-10 relative">
+                    <!-- Decorational blobs -->
+                    <div class="absolute -top-6 -right-6 w-32 h-32 bg-eco-leaf rounded-full mix-blend-multiply filter blur-xl opacity-70 z-0 animate-pulse"></div>
+                    <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-amber-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 z-0"></div>
+                    
+                    <!-- Stats badge -->
+                    <div class="absolute -bottom-10 right-4 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-xl flex items-center space-x-4 border border-gray-100 dark:border-slate-700 z-20 transition-colors duration-300">
+                        <div class="bg-green-100 dark:bg-green-900/50 p-3 rounded-full text-eco-green dark:text-green-400">
+                            <i class="fa-solid fa-leaf text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase">Tiempo de Degradación</p>
+                            <p class="text-2xl font-bold text-eco-dark dark:text-white">< 90 Días</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- STEAM Approach (Always Dark Theme by design) -->
+    <section id="steam" class="py-20 bg-[#0f172a]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-[#679973] font-bold tracking-wider uppercase text-sm">Metodología Educativa</span>
+                <h2 class="text-3xl md:text-4xl font-serif font-bold text-white mt-2 mb-4">El Enfoque Integrado STEAM</h2>
+                <p class="text-[#9db2a3]">Este proyecto articula cinco áreas fundamentales para resolver un problema real de nuestra comunidad, integrando desde la química verde hasta la analítica de datos.</p>
+            </div>
+
+            <!-- Top Grid: 3 Columns -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <!-- S: Science -->
+                <div class="bg-[#162a20] rounded-xl p-8 border border-[#233d2e] flex flex-col transition-all duration-300 hover:border-[#38664b]">
+                    <div class="text-5xl font-serif font-bold text-[#5c8a66] mb-4">S</div>
+                    <h3 class="text-xl text-white font-bold mb-1">Ciencia · Química Verde</h3>
+                    <p class="text-xs font-bold tracking-widest text-[#d4af37] uppercase mb-4">Foco Principal · Grupo 1</p>
+                    <p class="text-sm text-[#9db2a3] leading-relaxed mb-6 flex-grow">
+                        Química del carbono aplicada a polisacáridos. Gelatinización del almidón, plastificación con glicerina y el composite celulósico de yerba mate. Principios de biodegradación aeróbica y economía circular.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-xs text-[#86a890] border border-[#2a4d39] px-3 py-1 rounded-full">Biopolímeros</span>
+                        <span class="text-xs text-[#86a890] border border-[#2a4d39] px-3 py-1 rounded-full">Química Verde</span>
+                        <span class="text-xs text-[#86a890] border border-[#2a4d39] px-3 py-1 rounded-full">Composites</span>
+                    </div>
+                </div>
+
+                <!-- T: Technology -->
+                <div class="bg-[#162a20] rounded-xl p-8 border border-[#233d2e] flex flex-col transition-all duration-300 hover:border-[#38664b]">
+                    <div class="text-5xl font-serif font-bold text-[#5c8a66] mb-4">T</div>
+                    <h3 class="text-xl text-white font-bold mb-1">Tecnología · Web & Datos</h3>
+                    <p class="text-xs font-bold tracking-widest text-[#d4af37] uppercase mb-4">Informática · Grupo 3</p>
+                    <p class="text-sm text-[#9db2a3] leading-relaxed mb-6 flex-grow">
+                        Desarrollo de esta landing page con gráficos interactivos de datos experimentales. Integración con Google Sheets API para visualización de resultados. Códigos QR para acceso desde el stand.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-xs text-[#86a890] border border-[#2a4d39] px-3 py-1 rounded-full">Google Sheets API</span>
+                        <span class="text-xs text-[#86a890] border border-[#2a4d39] px-3 py-1 rounded-full">Web Dev</span>
+                        <span class="text-xs text-[#86a890] border border-[#2a4d39] px-3 py-1 rounded-full">Visualización</span>
+                    </div>
+                </div>
+
+                <!-- E: Engineering -->
+                <div class="bg-[#162a20] rounded-xl p-8 border border-[#233d2e] flex flex-col transition-all duration-300 hover:border-[#38664b]">
+                    <div class="text-5xl font-serif font-bold text-[#5c8a66] mb-4">E</div>
+                    <h3 class="text-xl text-white font-bold mb-1">Ingeniería · Diseño Proceso</h3>
+                    <p class="text-xs font-bold tracking-widest text-[#d4af37] uppercase mb-4">Laboratorio · Grupos 1 y 2</p>
+                    <p class="text-sm text-[#9db2a3] leading-relaxed mb-6 flex-grow">
+                        Operaciones unitarias a escala escolar: pesaje de precisión, control cinético de temperatura, agitación mecánica y curado. Diseño y construcción de moldes para la conformación geométrica.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-xs text-[#86a890] border border-[#2a4d39] px-3 py-1 rounded-full">Moldes</span>
+                        <span class="text-xs text-[#86a890] border border-[#2a4d39] px-3 py-1 rounded-full">Control térmico</span>
+                        <span class="text-xs text-[#86a890] border border-[#2a4d39] px-3 py-1 rounded-full">Curado</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Grid: 2 Columns -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <!-- A: Art -->
+                <div class="bg-[#162a20] rounded-xl p-8 border border-[#233d2e] flex flex-col transition-all duration-300 hover:border-[#38664b]">
+                    <div class="text-5xl font-serif font-bold text-[#5c8a66] mb-4">A</div>
+                    <h3 class="text-xl text-white font-bold mb-1">Arte · Identidad Visual</h3>
+                    <p class="text-xs font-bold tracking-widest text-[#d4af37] uppercase mb-4">Diseño Gráfico · Grupo 2</p>
+                    <p class="text-sm text-[#9db2a3] leading-relaxed mb-6 flex-grow">
+                        Teoría del color aplicada a productos sustentables. Creación de logotipo, paleta cromática y tipografía institucional. Tratamiento superficial del biopolímero para texturas rústicas con valor comercial.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-xs text-[#86a890] border border-[#2a4d39] px-3 py-1 rounded-full">Branding</span>
+                        <span class="text-xs text-[#86a890] border border-[#2a4d39] px-3 py-1 rounded-full">Teoría del color</span>
+                        <span class="text-xs text-[#86a890] border border-[#2a4d39] px-3 py-1 rounded-full">Estética</span>
+                    </div>
+                </div>
+
+                <!-- M: Math -->
+                <div class="bg-[#162a20] rounded-xl p-8 border border-[#233d2e] flex flex-col transition-all duration-300 hover:border-[#38664b]">
+                    <div class="text-5xl font-serif font-bold text-[#5c8a66] mb-4">M</div>
+                    <h3 class="text-xl text-white font-bold mb-1">Matemática · Análisis Datos</h3>
+                    <p class="text-xs font-bold tracking-widest text-[#d4af37] uppercase mb-4">Estadística · Grupo 4</p>
+                    <p class="text-sm text-[#9db2a3] leading-relaxed mb-6 flex-grow">
+                        Proporciones estequiométricas en la formulación del bioplástico. Análisis estadístico de los datos de biodegradación: medias, desvíos y curvas de tendencia. Cálculo de frecuencias relativas y absolutas.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-xs text-[#86a890] border border-[#2a4d39] px-3 py-1 rounded-full">Estequiometría</span>
+                        <span class="text-xs text-[#86a890] border border-[#2a4d39] px-3 py-1 rounded-full">Estadística</span>
+                        <span class="text-xs text-[#86a890] border border-[#2a4d39] px-3 py-1 rounded-full">Gráficos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Theoretical Framework (Accordion) -->
+    <section id="teoria" class="py-20 bg-eco-light dark:bg-slate-900/50 transition-colors duration-300">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <i class="fa-solid fa-book-open text-3xl text-eco-green dark:text-eco-leaf mb-4"></i>
+                <h2 class="text-3xl font-serif font-bold text-eco-dark dark:text-white">Marco Teórico Científico</h2>
+                <p class="text-gray-600 dark:text-gray-400 mt-3">Comprender la química detrás de las Eco-Macetas.</p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Accordion Item 1 -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors duration-300">
+                    <button class="accordion-btn w-full px-6 py-4 text-left font-bold text-lg text-gray-800 dark:text-white flex justify-between items-center focus:outline-none">
+                        <span>El Almidón como Matriz Polimérica</span>
+                        <i class="fa-solid fa-chevron-down text-eco-green dark:text-eco-leaf transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-6 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                        <p class="pb-4">El almidón está compuesto por dos polímeros de glucosa: amilosa (lineal) y amilopectina (ramificada). Para transformarlo en plástico, rompemos su estructura cristalina insoluble mediante el calor y el agua en un proceso llamado <strong>gelatinización</strong>.</p>
+                    </div>
+                </div>
+
+                <!-- Accordion Item 2 -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors duration-300">
+                    <button class="accordion-btn w-full px-6 py-4 text-left font-bold text-lg text-gray-800 dark:text-white flex justify-between items-center focus:outline-none">
+                        <span>Función del Ácido Acético y la Glicerina</span>
+                        <i class="fa-solid fa-chevron-down text-eco-green dark:text-eco-leaf transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-6 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                        <p class="pb-4">El ácido acético (vinagre) actúa como catalizador hidrolítico, rompiendo ramificaciones para linealizar las moléculas. La glicerina se intercala entre las cadenas como plastificante, reemplazando fuerzas de atracción excesivas y dotando al bioplástico de flexibilidad, evitando que sea quebradizo al secar.</p>
+                    </div>
+                </div>
+
+                <!-- Accordion Item 3 -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors duration-300">
+                    <button class="accordion-btn w-full px-6 py-4 text-left font-bold text-lg text-gray-800 dark:text-white flex justify-between items-center focus:outline-none">
+                        <span>La Yerba Mate como Refuerzo Estructural</span>
+                        <i class="fa-solid fa-chevron-down text-eco-green dark:text-eco-leaf transition-transform duration-300"></i>
+                    </button>
+                    <div class="accordion-content px-6 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                        <p class="pb-4">Actuando como un material compuesto (composite), la matriz es el almidón y la fase de refuerzo es la fibra de yerba mate seca. La celulosa de la yerba incrementa el Módulo de Young (dureza y resistencia) y reduce la contracción del material durante el curado.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Diseño de la Investigación y Metodología -->
+    <section id="metodologia" class="py-20 bg-white dark:bg-slate-900 transition-colors duration-300 border-t border-gray-100 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-eco-leaf font-bold tracking-wider uppercase text-sm">El Camino Científico</span>
+                <h2 class="text-3xl md:text-4xl font-serif font-bold text-eco-dark dark:text-white mt-2 mb-4">Diseño de la Investigación y Metodología</h2>
+                <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+                    El presente proyecto se define como una investigación de tipo <strong>experimental, descriptiva y tecnológica</strong>. Sigue un enfoque mixto (cualitativo y cuantitativo), dividido en cuatro fases metodológicas consecutivas:
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Fase 1 -->
+                <div class="bg-gray-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-100 dark:border-slate-700 flex items-start space-x-4 transition-colors duration-300 hover:shadow-lg group">
+                    <div class="bg-eco-green text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0 group-hover:scale-110 transition-transform">1</div>
+                    <div>
+                        <h3 class="text-xl font-bold text-eco-dark dark:text-white mb-2">Fase 1: Diagnóstico y Relevamiento Social</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">Diseño y aplicación de encuestas digitales a la comunidad educativa para medir el nivel de conocimiento sobre los bioplásticos y evaluar la aceptabilidad de un producto eco-sustentable en Monteros.</p>
+                    </div>
+                </div>
+
+                <!-- Fase 2 -->
+                <div class="bg-gray-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-100 dark:border-slate-700 flex items-start space-x-4 transition-colors duration-300 hover:shadow-lg group">
+                    <div class="bg-eco-green text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0 group-hover:scale-110 transition-transform">2</div>
+                    <div>
+                        <h3 class="text-xl font-bold text-eco-dark dark:text-white mb-2">Fase 2: Experimentación en Laboratorio</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">Desarrollo de múltiples ensayos controlados modificando las variables estequiométricas (proporciones de reactivos) para identificar la formulación con mejor desempeño físico.</p>
+                    </div>
+                </div>
+
+                <!-- Fase 3 -->
+                <div class="bg-gray-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-100 dark:border-slate-700 flex items-start space-x-4 transition-colors duration-300 hover:shadow-lg group">
+                    <div class="bg-eco-green text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0 group-hover:scale-110 transition-transform">3</div>
+                    <div>
+                        <h3 class="text-xl font-bold text-eco-dark dark:text-white mb-2">Fase 3: Diseño y Modelado</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">Confección de prototipos y moldes para el prensado mecánico de las macetas, junto con el desarrollo de la imagen de marca y canales de comunicación digital.</p>
+                    </div>
+                </div>
+
+                <!-- Fase 4 -->
+                <div class="bg-gray-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-100 dark:border-slate-700 flex items-start space-x-4 transition-colors duration-300 hover:shadow-lg group">
+                    <div class="bg-eco-green text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0 group-hover:scale-110 transition-transform">4</div>
+                    <div>
+                        <h3 class="text-xl font-bold text-eco-dark dark:text-white mb-2">Fase 4: Ensayos de Degradabilidad e Impacto</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">Entierro controlado de muestras para registrar la tasa de pérdida de masa en sustrato biológicamente activo durante un periodo de observación.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cronograma de Actividades -->
+    <section id="cronograma" class="py-20 bg-gray-50 dark:bg-slate-800/30 transition-colors duration-300 border-t border-gray-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <i class="fa-solid fa-users-gear text-3xl text-eco-green dark:text-eco-leaf mb-4"></i>
+                <h2 class="text-3xl font-serif font-bold text-eco-dark dark:text-white">Cronograma de Actividades del Alumnado</h2>
+                <p class="text-gray-600 dark:text-gray-400 mt-3 leading-relaxed">
+                    El desarrollo ejecutivo del proyecto por parte de los estudiantes se estructuró de acuerdo a las pautas y consignas establecidas para cada comisión interna de trabajo:
+                </p>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-gray-100 dark:border-slate-700 overflow-hidden transition-colors duration-300">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[800px]">
+                        <thead>
+                            <tr class="bg-eco-green text-white dark:bg-[#162a20] dark:text-[#5c8a66] border-b border-green-700 dark:border-[#233d2e]">
+                                <th class="py-4 px-6 font-bold w-1/4">Grupo / Comisión</th>
+                                <th class="py-4 px-6 font-bold w-2/4">Consigna y Tarea Asignada</th>
+                                <th class="py-4 px-6 font-bold w-1/4">Entregable Final</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
+                            <!-- Fila Grupo 1 -->
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors group">
+                                <td class="py-5 px-6 align-top">
+                                    <div class="font-bold text-eco-dark dark:text-white mb-1">Grupo 1:</div>
+                                    <div class="text-eco-green dark:text-eco-leaf text-sm font-semibold">Investigadores de Laboratorio</div>
+                                </td>
+                                <td class="py-5 px-6 align-top text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                                    Ejecutar la síntesis química del bioplástico. Probar proporciones variables, registrar tiempos de cocción, temperaturas y documentar el proceso de curado.
+                                </td>
+                                <td class="py-5 px-6 align-top text-gray-700 dark:text-gray-300 text-sm font-medium">
+                                    <div class="flex items-start">
+                                        <i class="fa-solid fa-flask text-amber-500 mt-1 mr-2 flex-shrink-0"></i>
+                                        <span>Protocolo de laboratorio optimizado y muestras físicas del material compuesto.</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Fila Grupo 2 -->
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors group">
+                                <td class="py-5 px-6 align-top">
+                                    <div class="font-bold text-eco-dark dark:text-white mb-1">Grupo 2:</div>
+                                    <div class="text-eco-green dark:text-eco-leaf text-sm font-semibold">Diseñadores de Producto e Imagen</div>
+                                </td>
+                                <td class="py-5 px-6 align-top text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                                    Diseñar la forma, dimensiones y espesor de las macetas. Desarrollar el logotipo, la paleta de colores de la marca y seleccionar tipografías institucionales.
+                                </td>
+                                <td class="py-5 px-6 align-top text-gray-700 dark:text-gray-300 text-sm font-medium">
+                                    <div class="flex items-start">
+                                        <i class="fa-solid fa-palette text-amber-500 mt-1 mr-2 flex-shrink-0"></i>
+                                        <span>Moldes de producción funcionales y etiquetas con diseño estético sustentable.</span>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Fila Grupo 3 -->
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors group">
+                                <td class="py-5 px-6 align-top">
+                                    <div class="font-bold text-eco-dark dark:text-white mb-1">Grupo 3:</div>
+                                    <div class="text-eco-green dark:text-eco-leaf text-sm font-semibold">Tecnólogos y Programadores</div>
+                                </td>
+                                <td class="py-5 px-6 align-top text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                                    Diseñar la estructura de datos en Google Sheets para el laboratorio. Desarrollar el sitio web interactivo en Google Sites y configurar los códigos QR de acceso.
+                                </td>
+                                <td class="py-5 px-6 align-top text-gray-700 dark:text-gray-300 text-sm font-medium">
+                                    <div class="flex items-start">
+                                        <i class="fa-solid fa-code text-amber-500 mt-1 mr-2 flex-shrink-0"></i>
+                                        <span>Sitio Web publicado y códigos QR listos para el stand de la feria.</span>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Fila Grupo 4 -->
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors group">
+                                <td class="py-5 px-6 align-top">
+                                    <div class="font-bold text-eco-dark dark:text-white mb-1">Grupo 4:</div>
+                                    <div class="text-eco-green dark:text-eco-leaf text-sm font-semibold">Analistas Sociales y de Mercado</div>
+                                </td>
+                                <td class="py-5 px-6 align-top text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                                    Formular, distribuir y procesar la encuesta digital a la comunidad. Realizar la entrevista al especialista y elaborar las proyecciones de viabilidad económica.
+                                </td>
+                                <td class="py-5 px-6 align-top text-gray-700 dark:text-gray-300 text-sm font-medium">
+                                    <div class="flex items-start">
+                                        <i class="fa-solid fa-chart-line text-amber-500 mt-1 mr-2 flex-shrink-0"></i>
+                                        <span>Informe estadístico tabulado con gráficos explicativos y modelo de negocio.</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lab Protocol Timeline -->
+    <section id="laboratorio" class="py-20 bg-white dark:bg-slate-900 transition-colors duration-300 border-t border-gray-100 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-serif font-bold text-center text-eco-dark dark:text-white mb-16">Protocolo de Laboratorio</h2>
+            
+            <div class="flex flex-col md:flex-row gap-12">
+                <!-- Ingredients -->
+                <div class="w-full md:w-1/3 bg-gray-50 dark:bg-slate-800/50 p-8 rounded-3xl border border-gray-100 dark:border-slate-700 transition-colors duration-300">
+                    <h3 class="text-xl font-bold mb-6 text-gray-800 dark:text-white flex items-center">
+                        <i class="fa-solid fa-scale-balanced text-eco-leaf mr-3"></i> Reactivos (Base 4 uds)
+                    </h3>
+                    <ul class="space-y-4 text-gray-700 dark:text-gray-300">
+                        <li class="flex items-start"><i class="fa-solid fa-check text-green-500 dark:text-green-400 mt-1 mr-2"></i> <strong>30g</strong> Almidón de Maíz (Matriz)</li>
+                        <li class="flex items-start"><i class="fa-solid fa-check text-green-500 dark:text-green-400 mt-1 mr-2"></i> <strong>200mL</strong> Agua Destilada (Solvente)</li>
+                        <li class="flex items-start"><i class="fa-solid fa-check text-green-500 dark:text-green-400 mt-1 mr-2"></i> <strong>25mL</strong> Glicerina USP (Plastificante)</li>
+                        <li class="flex items-start"><i class="fa-solid fa-check text-green-500 dark:text-green-400 mt-1 mr-2"></i> <strong>20mL</strong> Ácido Acético 5% (Catalizador)</li>
+                        <li class="flex items-start"><i class="fa-solid fa-check text-green-500 dark:text-green-400 mt-1 mr-2"></i> <strong>15g</strong> Yerba Mate Usada (Refuerzo)</li>
+                    </ul>
+                </div>
+
+                <!-- Timeline Steps -->
+                <div class="w-full md:w-2/3 relative">
+                    <!-- Line -->
+                    <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-green-200 dark:bg-green-900 hidden md:block"></div>
+                    
+                    <div class="space-y-8">
+                        <!-- Step 1 -->
+                        <div class="relative pl-0 md:pl-12">
+                            <div class="hidden md:flex absolute left-0 top-1 w-8 h-8 bg-eco-green rounded-full items-center justify-center text-white font-bold text-sm shadow-md z-10 border-4 border-white dark:border-slate-900 transform -translate-x-3.5">1</div>
+                            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 transition-colors duration-300">
+                                <h4 class="font-bold text-lg text-eco-dark dark:text-white mb-2">Dispersión Inicial</h4>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm">Mezclar los 200mL de agua destilada con 30g de almidón. Agitar vigorosamente en vaso de precipitados hasta lograr una suspensión libre de grumos.</p>
+                            </div>
+                        </div>
+                        <!-- Step 2 -->
+                        <div class="relative pl-0 md:pl-12">
+                            <div class="hidden md:flex absolute left-0 top-1 w-8 h-8 bg-eco-green rounded-full items-center justify-center text-white font-bold text-sm shadow-md z-10 border-4 border-white dark:border-slate-900 transform -translate-x-3.5">2</div>
+                            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 transition-colors duration-300">
+                                <h4 class="font-bold text-lg text-eco-dark dark:text-white mb-2">Acidificación y Plastificación</h4>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm">Añadir 20mL de ácido acético y 25mL de glicerina. Agitar durante 2 minutos para homogenizar interacciones químicas.</p>
+                            </div>
+                        </div>
+                        <!-- Step 3 -->
+                        <div class="relative pl-0 md:pl-12">
+                            <div class="hidden md:flex absolute left-0 top-1 w-8 h-8 bg-eco-green rounded-full items-center justify-center text-white font-bold text-sm shadow-md z-10 border-4 border-white dark:border-slate-900 transform -translate-x-3.5">3</div>
+                            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 transition-colors duration-300">
+                                <h4 class="font-bold text-lg text-eco-dark dark:text-white mb-2">Incorporación de Carga & Gelatinización</h4>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm">Agregar 15g de yerba mate tamizada. Calentar en plancha a 90°C bajo agitación constante. A los 7-10 minutos transiciona a un gel translúcido.</p>
+                            </div>
+                        </div>
+                        <!-- Step 4 -->
+                        <div class="relative pl-0 md:pl-12">
+                            <div class="hidden md:flex absolute left-0 top-1 w-8 h-8 bg-eco-green rounded-full items-center justify-center text-white font-bold text-sm shadow-md z-10 border-4 border-white dark:border-slate-900 transform -translate-x-3.5">4</div>
+                            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 transition-colors duration-300">
+                                <h4 class="font-bold text-lg text-eco-dark dark:text-white mb-2">Moldeado y Curado</h4>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm">Verter el gel caliente en los moldes aplicando presión. Secar en ambiente ventilado por mínimo 72 horas para evaporar el solvente.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Multimedia Section -->
+    <section id="multimedia" class="py-20 bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <span class="text-eco-leaf font-bold tracking-wider uppercase text-sm">Galería Audiovisual</span>
+                <h2 class="text-3xl font-serif font-bold mt-2">Documental y Proceso</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <!-- YouTube Video Embed -->
+                <div class="bg-gray-800 rounded-2xl overflow-hidden shadow-2xl border border-gray-700 aspect-video relative">
+                    <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/dQw4w9WgXcQ?si=Placeholder" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+
+                <!-- Custom 16-Image Carousel -->
+                <div class="relative w-full h-64 sm:h-80 md:h-96 rounded-2xl overflow-hidden shadow-2xl border border-gray-700 group">
+                    <div id="carousel-inner" class="w-full h-full relative">
+                        <!-- Imágenes superpuestas para efecto de desvanecimiento (Fade) sin leyendas -->
+                        <img src="images/Alumnos 1.jpg" alt="Proceso 1" class="carousel-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100 z-10">
+                        <img src="images/Alumnos 2.jpg" alt="Proceso 2" class="carousel-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 z-0">
+                        <img src="images/Alumnos 3.jpg" alt="Proceso 3" class="carousel-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 z-0">
+                        <img src="images/Alumnos 4.jpg" alt="Proceso 4" class="carousel-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 z-0">
+                        <img src="images/Alumnos 5.jpg" alt="Proceso 5" class="carousel-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 z-0">
+                        <img src="images/Alumnos 6.jpg" alt="Proceso 6" class="carousel-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 z-0">
+                        <img src="images/Alumnos 7.jpg" alt="Proceso 7" class="carousel-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 z-0">
+                        <img src="images/Alumnos 8.jpg" alt="Proceso 8" class="carousel-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 z-0">
+                        <img src="images/Alumnos 9.jpg" alt="Proceso 9" class="carousel-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 z-0">
+                        <img src="images/Alumnos 10.jpg" alt="Proceso 10" class="carousel-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 z-0">
+                        <img src="images/Alumnos 11.jpg" alt="Proceso 11" class="carousel-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 z-0">
+                        <img src="images/Alumnos 12.jpg" alt="Proceso 12" class="carousel-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 z-0">
+                        <img src="images/Alumnos 13.jpg" alt="Proceso 13" class="carousel-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 z-0">
+                        <img src="images/Alumnos 14.jpg" alt="Proceso 14" class="carousel-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 z-0">
+                        <img src="images/Alumnos 15.jpg" alt="Proceso 15" class="carousel-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 z-0">
+                        <img src="images/Alumnos 16.jpg" alt="Proceso 16" class="carousel-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0 z-0">
+                    </div>
+                    
+                    <button id="prev-btn" class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-eco-green text-white w-10 h-10 rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 z-20"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button id="next-btn" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-eco-green text-white w-10 h-10 rounded-full flex items-center justify-center transition opacity-0 group-hover:opacity-100 z-20"><i class="fa-solid fa-chevron-right"></i></button>
+                    
+                    <!-- Indicators -->
+                    <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1.5 z-20" id="carousel-dots">
+                        <!-- Dots rendered by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community & Survey Section -->
+    
+
+    <!-- Footer -->
+    
+<section id="dashboard-cientifico" class="py-20 bg-slate-950 text-white">
+<div class="max-w-7xl mx-auto px-6">
+<h2 class="text-5xl font-bold text-center mb-4">🧪 Laboratorio de Datos</h2>
+<p class="text-center text-slate-300 mb-12">Resultados experimentales del proyecto Eco‑Macetas.</p>
+
+<div class="relative mb-10">
+<img src="images/dashboard/eco-macetas-reales.png" style="width:100%;border-radius:24px;">
+
+<div class="grid md:grid-cols-2 gap-4 mb-8 text-center">
+<div>♻️ Elaboradas con yerba mate de descarte</div>
+<div>🌱 Biodegradables</div>
+<div>🪴 Aptas para germinación</div>
+<div>⏱️ Degradación completa en menos de 90 días</div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-6 mb-6">
+<div class="bg-slate-900 p-6 rounded-xl"><canvas id="encuestaChart"></canvas></div>
+<div class="bg-slate-900 p-6 rounded-xl">
+<h3 class="text-2xl mb-4">Impacto Monteros</h3>
+<p>6,2 kg por persona</p><p>30.000 habitantes</p><p>185 toneladas/año</p>
+</div>
+</div>
+
+<div class="bg-slate-900 p-6 rounded-xl mb-8"><canvas id="bioChart"></canvas></div>
+
+<style>.info-wrap{background:linear-gradient(180deg,#020817,#031127);padding:20px;border-radius:20px}.survey-btn{display:flex;align-items:center;justify-content:center;gap:16px;width:min(520px,90%);margin:24px auto 0;height:86px;border-radius:999px;color:#fff;font-weight:700;font-size:1.5rem;text-decoration:none;border:2px solid #8dfc62;background:rgba(35,120,40,.2);box-shadow:0 0 25px rgba(140,255,100,.5), inset 0 0 20px rgba(140,255,100,.15)} .paper-card{background:#efe6d2;padding:20px;border-radius:20px;color:#222;min-height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center}.piefake{width:260px;height:260px;border-radius:50%;background:conic-gradient(#4f8f2f 0 75%, #d97706 75% 92%, #2563eb 92% 100%);border:8px solid #b0895a;position:relative}.piefake:after{content:'75%';position:absolute;right:55px;bottom:70px;color:#fff;font-size:42px;font-weight:700}</style><h3 class="text-4xl font-bold mb-6 text-center">🌱 INFOGRAFÍAS DEL PROYECTO</h3><div class="info-wrap"><div class="grid md:grid-cols-3 gap-6"><img class="w-full rounded-3xl" src="images/dashboard/infografía-1.png"><div class="paper-card"><h4>Porcentaje de argentinos que consideran el impacto ambiental</h4><div class="piefake"></div><div>🌿75% Alta disposición · 🍂17% Moderada · 💧8% Indiferentes</div></div><img class="w-full rounded-3xl" src="images/dashboard/infografía-3.png"></div><a class="survey-btn" href="https://forms.gle/vD91osQS3qPKkMFm7" target="_blank">📝 Participar en Encuesta ➜</a></div></section>
+
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+if(window.Chart){
+new Chart(document.getElementById('encuestaChart'),{
+type:'doughnut',
+data:{labels:['Totalmente de acuerdo','Moderadamente','En desacuerdo'],datasets:[{data:[98,17,5]}]}
+});
+new Chart(document.getElementById('bioChart'),{
+type:'line',
+data:{labels:['0','30','60','90'],
+datasets:[
+{label:'M1',data:[45.2,28.4,11.2,0]},
+{label:'M2',data:[44.8,29.1,10.8,0]},
+{label:'M3',data:[35,12.1,0.5,0]}
+]}
+});
+}
+});
+</script>
+<footer class="bg-eco-dark dark:bg-[#080f1a] text-white pt-16 pb-8 border-t border-green-900 dark:border-slate-800 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fa-solid fa-leaf text-eco-leaf text-2xl mr-2"></i>
+                        <span class="font-bold text-xl">Eco-Macetas</span>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4 italic">
+                        "Educar dando sentido a la vida en el encuentro con los otros y en el cuidado integral de la creación"
+                    </p>
+                    <p class="text-gray-300 text-sm">
+                        <i class="fa-solid fa-location-dot text-eco-leaf mr-2"></i> Monteros, Tucumán, Argentina. 2026.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-4 border-b border-gray-700 pb-2">Equipo Emprendedor</h4>
+                    <p class="text-gray-400 text-sm mb-1"><strong>Alumnos:</strong> 4° Año "B" - Cs. Sociales</p>
+                    <p class="text-gray-400 text-sm mb-1 mt-3"><strong>Docentes Asesores:</strong></p>
+                    <ul class="text-gray-400 text-sm list-disc list-inside ml-2">
+                        <li>Prof. Alurralde Marcos Gabriel</li>
+                        <li>Prof. Rodríguez Patricio</li>
+                        <li>Prof. Díaz Bozza Cecilia</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-bold mb-4 border-b border-gray-700 pb-2">Enlaces Rápidos</h4>
+                    <ul class="space-y-2 text-sm text-gray-400">
+                        <li><a href="#proyecto" class="hover:text-eco-leaf transition">El Proyecto</a></li>
+                        <li><a href="#steam" class="hover:text-eco-leaf transition">Metodología STEAM</a></li>
+                        <li><a href="#laboratorio" class="hover:text-eco-leaf transition">Laboratorio</a></li>
+                        <li><a href="https://forms.gle/vD91osQS3qPKkMFm7" target="_blank" class="hover:text-eco-leaf transition">Participar en Encuesta</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="text-center text-gray-500 text-xs border-t border-gray-800 pt-8">
+                &copy; 2026 Proyecto Feria de Ciencias - Colegio Santísimo Rosario. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top Button -->
+    <button id="scrollToTopBtn" class="fixed bottom-6 right-6 bg-eco-green hover:bg-eco-leaf dark:bg-green-600 dark:hover:bg-green-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-2xl transition-all duration-500 opacity-0 pointer-events-none transform translate-y-4 z-40" aria-label="Volver arriba">
+        <i class="fa-solid fa-arrow-up text-lg"></i>
+    </button>
+
+    <!-- Chatbot Toggle Button -->
+    <button id="chatToggleBtn" class="fixed bottom-6 left-6 bg-eco-dark dark:bg-slate-800 border-2 border-white/20 hover:bg-eco-green text-white w-14 h-14 rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(21,128,61,0.5)] transition-transform hover:scale-110 z-50 focus:outline-none group" aria-label="Abrir asistente virtual">
+        <i class="fa-solid fa-robot text-2xl group-hover:animate-pulse"></i>
+    </button>
+
+    <!-- Chatbot Window -->
+    <div id="chatWindow" class="chat-window fixed bottom-24 left-6 w-[85vw] sm:w-96 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700 z-50 flex flex-col overflow-hidden h-[32rem] max-h-[75vh]">
+        <!-- Header -->
+        <div class="bg-eco-dark text-white p-4 flex justify-between items-center shadow-md z-10">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-robot text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold leading-tight">Eco-Bot</h3>
+                    <p class="text-xs text-green-200 font-medium">Asistente Virtual IA</p>
+                </div>
+            </div>
+            <button id="closeChatBtn" class="text-gray-300 hover:text-white transition focus:outline-none p-1 rounded-md hover:bg-white/10">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+        
+        <!-- Chat History -->
+        <div id="chatHistory" class="flex-1 p-4 overflow-y-auto bg-slate-50 dark:bg-slate-900/80 flex flex-col space-y-4 scroll-smooth">
+            <!-- Initial Greeting -->
+            <div class="flex justify-start">
+                <div class="bg-white dark:bg-slate-700 border border-gray-100 dark:border-slate-600 text-gray-800 dark:text-gray-200 rounded-2xl rounded-tl-none px-4 py-3 text-sm shadow-sm max-w-[90%] leading-relaxed">
+                    ¡Hola! 👋 Soy <strong>Eco-Bot</strong>, la inteligencia artificial entrenada por los alumnos de 4° "B". ¿Tienes alguna pregunta sobre la química de nuestro biopolímero, el proceso STEAM o los resultados de las Eco-Macetas?
+                </div>
+            </div>
+        </div>
+        
+        <!-- Input Area -->
+        <div class="p-3 bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700 flex items-end space-x-2">
+            <textarea id="chatInput" rows="1" placeholder="Haz tu pregunta aquí..." class="flex-1 bg-gray-100 dark:bg-slate-900 border border-transparent rounded-2xl px-4 py-2.5 text-sm text-gray-800 dark:text-white focus:outline-none focus:border-eco-green dark:focus:border-eco-leaf focus:bg-white dark:focus:bg-slate-800 placeholder-gray-500 transition-all resize-none max-h-24"></textarea>
+            <button id="sendChatBtn" class="bg-eco-green hover:bg-eco-leaf text-white w-10 h-10 rounded-full flex items-center justify-center transition disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0">
+                <i class="fa-solid fa-paper-plane text-sm transform -translate-x-0.5"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- Dark Mode Logic ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+        
+        const mobileThemeToggleBtn = document.getElementById('mobile-theme-toggle');
+        const mobileDarkIcon = document.getElementById('mobile-dark-icon');
+        const mobileLightIcon = document.getElementById('mobile-light-icon');
+
+        // Check local storage or system preferences on load
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            themeToggleLightIcon.classList.remove('hidden');
+            mobileLightIcon.classList.remove('hidden');
+        } else {
+            document.documentElement.classList.remove('dark');
+            themeToggleDarkIcon.classList.remove('hidden');
+            mobileDarkIcon.classList.remove('hidden');
+        }
+
+        function toggleTheme() {
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+            mobileDarkIcon.classList.toggle('hidden');
+            mobileLightIcon.classList.toggle('hidden');
+
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+            }
+        }
+
+        themeToggleBtn.addEventListener('click', toggleTheme);
+        mobileThemeToggleBtn.addEventListener('click', toggleTheme);
+
+        // --- Scroll to Top Logic ---
+        const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 400) {
+                scrollToTopBtn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+                scrollToTopBtn.classList.add('opacity-100', 'pointer-events-auto', 'translate-y-0');
+            } else {
+                scrollToTopBtn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+                scrollToTopBtn.classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
+            }
+        });
+
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // --- Mobile Menu Toggle ---
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+
+        // --- Navbar Scroll Effect ---
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                nav.classList.add('shadow-md');
+            } else {
+                nav.classList.remove('shadow-md');
+            }
+        });
+
+        // --- Hidden Objectives Toggle Logic ---
+        const toggleObjetivosBtn = document.getElementById('toggle-objetivos');
+        const objetivosContent = document.getElementById('objetivos-content');
+        const objetivosIcon = document.getElementById('objetivos-icon');
+
+        if(toggleObjetivosBtn) {
+            toggleObjetivosBtn.addEventListener('click', () => {
+                objetivosContent.classList.toggle('hidden');
+                objetivosIcon.classList.toggle('rotate-180');
+            });
+        }
+
+        // --- Accordion Logic ---
+        const accordions = document.querySelectorAll('.accordion-btn');
+        accordions.forEach(acc => {
+            acc.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                icon.classList.toggle('rotate-180');
+                const panel = this.nextElementSibling;
+                panel.classList.toggle('active');
+            });
+        });
+
+        // --- Carousel Logic (16 Slides Fade) ---
+        let currentIndex = 0;
+        const totalSlides = 16;
+        const slides = document.querySelectorAll('.carousel-slide');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const dotsContainer = document.getElementById('carousel-dots');
+
+        // Generate dots
+        dotsContainer.innerHTML = '';
+        for(let i=0; i<totalSlides; i++) {
+            const dot = document.createElement('span');
+            dot.className = `dot w-2 h-2 rounded-full bg-white transition cursor-pointer ${i === 0 ? 'opacity-100' : 'opacity-50'}`;
+            dot.addEventListener('click', () => {
+                currentIndex = i;
+                updateCarousel();
+                resetInterval();
+            });
+            dotsContainer.appendChild(dot);
+        }
+        const dots = document.querySelectorAll('.dot');
+
+        function updateCarousel() {
+            // Lógica Fade: Oculta todas las diapositivas y muestra solo la actual
+            slides.forEach((slide, index) => {
+                if (index === currentIndex) {
+                    slide.classList.remove('opacity-0', 'z-0');
+                    slide.classList.add('opacity-100', 'z-10');
+                } else {
+                    slide.classList.add('opacity-0', 'z-0');
+                    slide.classList.remove('opacity-100', 'z-10');
+                }
+            });
+            dots.forEach((dot, index) => {
+                if (index === currentIndex) {
+                    dot.classList.remove('opacity-50');
+                    dot.classList.add('opacity-100');
+                } else {
+                    dot.classList.add('opacity-50');
+                    dot.classList.remove('opacity-100');
+                }
+            });
+        }
+
+        function nextSlide() {
+            currentIndex = (currentIndex + 1) % totalSlides;
+            updateCarousel();
+        }
+
+        function prevSlide() {
+            currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+            updateCarousel();
+        }
+
+        nextBtn.addEventListener('click', () => {
+            nextSlide();
+            resetInterval();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            prevSlide();
+            resetInterval();
+        });
+        
+        // Auto-play carousel con reinicio al hacer clic
+        let carouselInterval = setInterval(nextSlide, 5000);
+
+        function resetInterval() {
+            clearInterval(carouselInterval);
+            carouselInterval = setInterval(nextSlide, 5000);
+        }
+
+        // --- Gemini AI Chatbot Logic ---
+        const chatToggleBtn = document.getElementById('chatToggleBtn');
+        const chatWindow = document.getElementById('chatWindow');
+        const closeChatBtn = document.getElementById('closeChatBtn');
+        const chatInput = document.getElementById('chatInput');
+        const sendChatBtn = document.getElementById('sendChatBtn');
+        const chatHistoryContainer = document.getElementById('chatHistory');
+
+        let chatConversationHistory = [];
+
+        // Contexto completo del proyecto STEAM inyectado como System Instruction
+        const systemPrompt = `Eres 'Eco-Bot', un asistente virtual amable, educativo e inteligente creado por los alumnos de 4° Año 'B' del Colegio Santísimo Rosario de Monteros, Tucumán, Argentina (Año 2026).
+        Estás integrado en la landing page del proyecto de feria de ciencias "ECO-MACETAS". Tu propósito es interactuar con los visitantes y el jurado, demostrando el dominio tecnológico del equipo.
+        
+        Información de la base de conocimientos del proyecto:
+        - Problema a resolver: Contaminación por plásticos de un solo uso (polietileno PEBD) en jardinería y nulo aprovechamiento de la yerba mate usada (residuo abundante localmente).
+        - Solución: Diseño y síntesis de un biopolímero biodegradable (plástico ecológico) para fabricar macetas para plantines.
+        - Receta estequiométrica: 30g Almidón de maíz (matriz polimérica), 200mL Agua destilada (solvente), 25mL Glicerina USP (agente plastificante para dar flexibilidad), 20mL Ácido acético al 5% o vinagre (catalizador hidrolítico para romper ramificaciones del almidón), 15g Yerba mate usada y tamizada (fase de refuerzo estructural celulósico).
+        - Operaciones de Laboratorio: Mezcla en frío, acidificación, calentamiento a 90°C (gelatinización por 7-10 min), prensado en moldes y curado por mínimo 72h.
+        - Resultados del ensayo: Las macetas resisten la humedad inicial del trasplante, pero en compost activo pierden su masa estructural (de ~45g a 0g) en un periodo menor a 90 días, alcanzando 100% de biodegradabilidad.
+        - Viabilidad social: Encuestas a 120 personas arrojaron que el 81.67% está totalmente de acuerdo en utilizarlas.
+        - Lema Institucional: "Educar dando sentido a la vida en el encuentro con los otros y en el cuidado integral de la creación".
+        - Asesor: Profesor Alurralde Marcos Gabriel.
+        
+        Reglas de Respuesta:
+        1. Tono: Entusiasta, respetuoso, empático, académico pero accesible al público general. Emplea emojis ocasionalmente para ser amigable.
+        2. Precisión: NUNCA inventes ingredientes, pasos ni porcentajes fuera de esta base de conocimiento.
+        3. Longitud: Tus respuestas deben ser MUY breves, de 1 a 3 párrafos cortos (máximo 60 palabras en total). Los usuarios están en una ventana de chat pequeña en una página web.
+        4. Si te saludan, preséntate como "Eco-Bot" y pregunta en qué puedes ayudar sobre la Química Verde o el enfoque STEAM.`;
+
+        // Auto-resize textarea
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        // Toggle Chat window
+        chatToggleBtn.addEventListener('click', () => {
+            chatWindow.classList.toggle('open');
+            if(chatWindow.classList.contains('open')) {
+                chatInput.focus();
+            }
+        });
+
+        closeChatBtn.addEventListener('click', () => {
+    try {
+        if (typeof chatConversationHistory !== 'undefined') chatConversationHistory = [];
+        if (typeof chatMessages !== 'undefined') {
+            chatMessages.innerHTML = '';
+            if (typeof addMessageToUI === 'function') {
+                addMessageToUI("¡Hola! Soy Eco‑Bot. Estoy especializado en Eco‑Macetas, química, STEAM e inteligencia artificial aplicada al proyecto. ¿En qué puedo ayudarte?", false);
+            }
+        }
+    } catch(e) { console.error(e); }
+
+            chatWindow.classList.remove('open');
+        });
+
+        function addMessageToUI(text, isUser = false) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = isUser ? 'flex justify-end' : 'flex justify-start';
+            
+            const bubble = document.createElement('div');
+            bubble.className = isUser 
+                ? 'bg-eco-green text-white rounded-2xl rounded-tr-none px-4 py-3 text-sm shadow-md max-w-[90%] break-words' 
+                : 'bg-white dark:bg-slate-700 border border-gray-100 dark:border-slate-600 text-gray-800 dark:text-gray-200 rounded-2xl rounded-tl-none px-4 py-3 text-sm shadow-sm max-w-[90%] break-words leading-relaxed';
+            
+            // Markdown basics (Bold and line breaks)
+            let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            bubble.innerHTML = formattedText;
+            
+            msgDiv.appendChild(bubble);
+            chatHistoryContainer.appendChild(msgDiv);
+            scrollToBottom();
+        }
+
+        function addTypingIndicator() {
+            const msgDiv = document.createElement('div');
+            msgDiv.id = 'typingIndicator';
+            msgDiv.className = 'flex justify-start';
+            msgDiv.innerHTML = `
+                <div class="bg-white dark:bg-slate-700 border border-gray-100 dark:border-slate-600 rounded-2xl rounded-tl-none px-4 py-4 shadow-sm max-w-[50%] flex items-center space-x-1.5">
+                    <div class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full typing-dot"></div>
+                    <div class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full typing-dot"></div>
+                    <div class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full typing-dot"></div>
+                </div>
+            `;
+            chatHistoryContainer.appendChild(msgDiv);
+            scrollToBottom();
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) indicator.remove();
+        }
+
+        function scrollToBottom() {
+            chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+        }
+
+        
+async function handleSendMessage() {
+    const text = chatInput.value.trim();
+    if (!text) return;
+
+    chatInput.value = '';
+    chatInput.disabled = true;
+    sendChatBtn.disabled = true;
+
+    addMessageToUI(text, true);
+    addTypingIndicator();
+
+    try {
+        const response = await fetch('/.netlify/functions/chat', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({message:text})
+        });
+
+        const result = await response.json();
+        removeTypingIndicator();
+
+        addMessageToUI(result.answer || 'No pude generar una respuesta.', false);
+
+    } catch(error) {
+        removeTypingIndicator();
+        addMessageToUI('Error al conectar con Eco‑Bot.', false);
+    } finally {
+        chatInput.disabled = false;
+        sendChatBtn.disabled = false;
+        chatInput.focus();
+    }
+}
+
+sendChatBtn.addEventListener('click', handleSendMessage);
+
+chatInput.addEventListener('keydown', (e) => {
+ if (e.key === 'Enter' && !e.shiftKey) {
+   e.preventDefault();
+   handleSendMessage();
+ }
+});
+
+</script>
+
+<div id="imgModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;align-items:center;justify-content:center;padding:20px">
+<img id="modalImg" style="max-width:95%;max-height:95%">
+</div>
+<script>
+document.querySelectorAll('.infographic').forEach(i=>i.onclick=()=>{imgModal.style.display='flex';modalImg.src=i.src});
+imgModal.onclick=()=>imgModal.style.display='none';
+</script>
+</body>
+</html>
